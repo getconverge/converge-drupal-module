@@ -1,0 +1,7 @@
+name = Converge Resources
+version=7.x-1.0
+description = Provides RESTful API implementation for communication between Converge and Drupal
+core = 7.x
+package = Converge
+dependencies[] = services
+configure = admin/config/converge/converge_resources

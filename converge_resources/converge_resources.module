@@ -1,0 +1,106 @@
+<?php
+/**
+ * Implementation of the Converge Resources module by implementing various hooks.
+ */
+
+
+/**
+ * Implements hook_menu() by adding Converge options to the administration menu.
+ */
+function converge_resources_menu() {
+  $items = array();
+
+  $items['admin/config/converge'] = array(
+      'title' => 'Converge',
+      'description' => 'Configuration related to Converge.',
+      'position' => 'left',
+      'weight' => -15,
+      'page callback' => 'system_admin_menu_block_page',
+      'access arguments' => array('access administration pages'),
+      'file' => 'system.admin.inc',
+  );
+
+  $items['admin/config/converge/converge_resources'] = array(
+      'title' => 'Converge resources',
+      'description' => 'Configure options for Converge Services API resources.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('converge_resources_settings'),
+      'access callback' => 'user_access',
+      'access arguments' => array('administer site configuration'),
+      'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Generates a Services Resource Definition that adds a newsitem resource
+ * to the services module with a retrieve operation that is used for looking
+ * up nodes with a given Converge identifier.
+ */
+function _newsitem_resource_definition() {
+  $newsitem_resource = array(
+      'newsitem' => array(
+          'retrieve' => array(
+              'help' => 'Retrieves a node by its Converge identifier',
+              'file' => array('type' => 'inc', 'module' => 'converge_resources', 'name' => 'includes/newsitem_resource'),
+              'callback' => '_newsitem_resource_retrieve',
+              'args' => array(
+                  array(
+                      'name' => 'id',
+                      'optional' => FALSE,
+                      'source' => array('path' => 0),
+                      'type' => 'int',
+                      'description' => 'The id of the newsitem to get',
+                  ),
+              ),
+              'access callback' => '_newsitem_resource_access',
+              'access arguments' => array('view'),
+              'access arguments append' => TRUE,
+          ),
+      ),
+  );
+
+  return $newsitem_resource;
+}
+
+/**
+ * Implements hook_services_resources() exposed by the Services module.
+ * Adds the Converge resource definitions to the Services module.
+ */
+function converge_resources_services_resources() {
+  $resources = array();
+  $resources += _newsitem_resource_definition();
+
+  return $resources;
+}
+
+
+function converge_resources_settings() {
+  // Get all active fields
+  $fields = field_info_fields();
+  $number_fields = array();
+
+  foreach ($fields as $field) {
+    // Filter by integer types
+    if ($field['type'] == 'number_integer') {
+      $number_fields[$field['field_name']] = $field;
+    }
+  }
+
+  $field_names = array_keys($number_fields);
+  $options = array_combine($field_names, $field_names);
+
+  $form = array();
+
+  $form['converge_resources_newsitem'] = array(
+      '#type' => 'select',
+      '#title' => t('Converge Identifier Field'),
+      '#description' => t('Field that contains the Converge identifier that will be used to query for existing news items'),
+      '#default_value' => variable_get('converge_resources_newsitem', ''),
+      '#options' => $options,
+  );
+
+  return system_settings_form($form);
+}
+

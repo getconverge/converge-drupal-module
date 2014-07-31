@@ -1,4 +1,4 @@
-converge_drupal_module
+Converge Drupal Module
 ======================
 
 Drupal module required for integrating Converge with Drupal

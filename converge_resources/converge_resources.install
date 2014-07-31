@@ -1,0 +1,21 @@
+<?php
+/**
+ * Install, uninstall and update the Converge resources module.
+ */
+
+/**
+ * Implements hook_install() by setting a variable to contain the 
+ * name of the node field containing the ID of the corresponding 
+ * Converge story.
+ */
+function converge_resources_install() {
+	variable_set('converge_resources_newsitem', 'field_newsitem');
+}
+
+/**
+ * Implements hook_uninstall() by removing the field reference 
+ * variable created during installation.
+ */
+function converge_resources_uninstall() {
+	variable_del('converge_resources_newsitem');
+}
